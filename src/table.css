@@ -1,0 +1,30 @@
+/*.border-table {
+  border: 1px solid black;
+}*/
+tbody > div {
+  position: relative;
+}
+
+.border-table td,
+.border-table th {
+  border: 1px solid black;
+  padding: 10px;
+}
+
+.selected {
+  background: rebeccapurple;
+  color: white;
+}
+
+.selecting {
+  border: 1px solid rebeccapurple;
+  background: lime;
+}
+
+.selectable-selectbox {
+  z-index: 9000;
+  position: absolute;
+  cursor: default;
+  background: none;
+  border: 1px dashed grey;
+}

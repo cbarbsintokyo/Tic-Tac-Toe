@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "core-js": "^2.5.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
-    "react-scripts": "1.0.10"
+    "react-scripts": "1.0.10",
+    "react-selectable-fast": "^2.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

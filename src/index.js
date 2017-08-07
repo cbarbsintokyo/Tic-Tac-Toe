@@ -1,149 +1,107 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import {
+  createSelectable,
+  SelectableGroup } from 'react-selectable-fast';
+import './table.css';
 
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
+const handleSelecting = selectingItems => {
+  console.log('handleSelecting');
+  // selectingItems.forEach((item, idx) => {
+  //   const range = document.createRange();
+  //   console.log('range', range);
+  //   console.log('item', item.node);
+  //   range.selectNode(item.node);
+  //   console.log('range with node added', range, item);
+  //   window.getSelection().addRange(range);
+  // });
+
 }
 
-class Board extends React.Component {
-  renderSquare(i) {
-    return <Square value={this.props.squares[i]} onClick={() => this.props.onClick(i)} />;
-  }
-
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
+const handleSelectionClear = () => {
+  console.log('handleSelectionClear');
+  // CLEAR ALL SELECTIONS AND RANGES
 }
 
-class Game extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      history: [{
-        squares: Array(9).fill(null),
-      }],
-      stepNumber: 0,
-      xIsNext: true,
-    }
-  }
+const handleSelectionFinish = selectedItems => {
+  console.log('handleSelectionFinish', selectedItems);
+  //const selectedNode = selectedItems[0].node;
+  //const selection = window.getSelection();
+  const range = document.createRange();
+  const table = document.getElementsByClassName('selectable-table')[0];
+  console.log('table', table);
+  const row = table.getElementsByClassName('selected')[0];
+  const endrow = table.getElementsByClassName('selected')[`${selectedItems.length - 1}`];
+  // const numSelectedItems = selectedItems.length;
+  // const startRow = selectedItems[0];
+  // const endNode = selectedItems[selectedItems.length];
+  // selectedItems.forEach((item, idx) => {
+  //   // selectedNodes.push(item.node);
+  //   const range = document.createRange();
+  //   const selection = window.getSelection();
+  //   range.selectNode(item.node);
+  //   selection.addRange(range);
+  // });
 
-  handleClick(i) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
+  // TODO: CLEAR ALL RANGES AT setStart
 
-    if (calculateWinner(squares || squares(i))) {
-      return;
-    }
-    squares[i] = this.state.xIsNext ? 'X' : 'O';
-    this.setState({
-      history: history.concat([{
-        squares: squares,
-      }]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext,
-    });
-  }
+  // console.log('selectedNodes', selectedNode);
 
-  jumpTo(step) {
-    this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0,
-    });
-  }
+  range.setStartBefore(row);
+  range.setEndAfter(endrow);
 
+  window.getSelection().addRange(range);
 
-  render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-
-    const moves = history.map((step, move) => {
-      const desc = move ?
-        'Move #' + move :
-        'Game start';
-      const activeClass = (this.state.stepNumber == move) ?
-        'active' :
-        null;
-      return (
-        <li key={move} className={activeClass}>
-          <a href="#" onClick={() => this.jumpTo(move)}>{desc}</a>
-        </li>
-      );
-    });
-
-    let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
-    }
-
-    return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            squares={current.squares}
-            onClick={(i) => this.handleClick(i)}
-          />
-        </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <ol>{moves}</ol>
-        </div>
-      </div>
-    );
-  }
 }
 
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
 
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if(squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
+const TableRow = ({ selectableRef, selected, selecting }) => (
+  <tr
+    ref={selectableRef}
+    className={`item ${selecting && 'selecting'} ${selected && 'selected'}`}
+  >
+    <td>Row</td>
+    <td>Data</td>
+  </tr>
+);
+
+const SelectableRow = createSelectable(TableRow);
+
+
+const Table = () => (
+  <div>
+    <table className='border-table'>
+      <thead>
+        <tr>
+          <th>Column 1</th>
+          <th>Column 2</th>
+        </tr>
+      </thead>
+      <SelectableGroup
+        className='selectable-table'
+        clickClassName='selected'
+        component='tbody'
+        enableDeselect
+        tolerance={0}
+        allowClickWithoutSelected={false}
+        duringSelection={handleSelecting}
+        onSelectionClear={handleSelectionClear}
+        onSelectionFinish={handleSelectionFinish}
+      >
+        <SelectableRow key={1} />
+        <SelectableRow key={2} />
+        <SelectableRow key={3} />
+      </SelectableGroup>
+    </table>
+    <div id='selection' className='selection'>
+    </div>
+  </div>
+);
 
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <Table />,
   document.getElementById('root')
 );
